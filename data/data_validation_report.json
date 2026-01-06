@@ -1,1 +1,22 @@
-
+{
+  "dataset_info": {
+    "total_items": 7083,
+    "total_columns": 75,
+    "file_size_mb": 10.018353462219238
+  },
+  "nova_distribution": {
+    "Group 3": 4368,
+    "Group 1": 1823,
+    "Group 2": 654,
+    "Group 4": 238
+  },
+  "nutritional_features": {
+    "available": 12,
+    "total": 12
+  },
+  "data_quality": {
+    "duplicate_food_codes": 0,
+    "missing_ingredients": 0,
+    "missing_processing": 0
+  }
+}
