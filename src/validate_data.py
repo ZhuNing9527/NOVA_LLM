@@ -298,12 +298,12 @@ def main():
     from pathlib import Path
     import sys
 
-    # 构建数据文件路径
+    
     base_path = Path(__file__).parent.parent
     data_path = base_path / 'data' / '副本FNDDS_2017_2018_NOVA_v3_nutrients.csv'
     output_dir = base_path / 'results'
 
-    # 确保输出目录存在
+    
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Check if file exists
