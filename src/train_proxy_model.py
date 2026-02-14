@@ -149,30 +149,29 @@ class ProxyModelTrainer:
         # Handle missing values
         X = X.fillna(X.median())
 
-        # 改进的特征名称处理：确保模型兼容性
-        print(f"原始特征名称: {list(X.columns)}")
+        print(f"Original feature name: {list(X.columns)}")
 
-        # 检查特征名称是否包含特殊字符
+     
         special_chars = set('.,()[]{}+-*/')
         has_special_chars = any(char in ''.join(X.columns) for char in special_chars)
 
         if has_special_chars:
-            print("检测到特征名包含特殊字符，进行兼容性处理...")
+            print("Special characters were detected in the feature name; compatibility processing is being performed...")
             feature_name_mapping = {}
             cleaned_X = X.copy()
 
-            # 只对有问题的模型使用通用特征名
+        
             for i, col in enumerate(self.nutritional_features):
                 if col in X.columns:
                     clean_name = f"feature_{i}"
                     feature_name_mapping[col] = clean_name
                     cleaned_X = cleaned_X.rename(columns={col: clean_name})
 
-            # 使用清理后的特征矩阵
+    
             X = cleaned_X
-            print(f"清理后的特征名称: {list(X.columns)}")
+            print(f"Feature name after cleaning: {list(X.columns)}")
         else:
-            print("特征名称兼容性良好，无需处理")
+            print("Feature names are highly compatible and require no processing.")
             feature_name_mapping = {col: col for col in self.nutritional_features if col in X.columns}
 
         # Extract target variable (NII Score)
@@ -183,26 +182,21 @@ class ProxyModelTrainer:
         self.feature_names = list(X.columns)
         self.feature_name_mapping = feature_name_mapping
 
-        print(f"特征矩阵形状: {X.shape}")
-        print(f"目标变量形状: {y.shape}")
-        print(f"原始特征名映射: {self.feature_name_mapping}")
+        print(f"Feature matrix shape: {X.shape}")
+        print(f"Target variable shape: {y.shape}")
+        print(f"Original feature name mapping: {self.feature_name_mapping}")
 
-        # 验证数据质量
-        print(f"数据质量检查:")
-        print(f"  - 特征矩阵缺失值: {X.isnull().sum().sum()}")
-        print(f"  - 目标变量缺失值: {y.isnull().sum()}")
-        print(f"  - 特征矩阵数值范围: {X.describe().loc[['min', 'max']].T}")
-        print(f"  - 目标变量范围: [{y.min():.2f}, {y.max():.2f}]")
+       # Verify data quality
+        print(f"Data quality check:")
+        print(f"  - Missing values ​​in the feature matrix: {X.isnull().sum().sum()}")
+        print(f"  - Missing values ​​for the target variable: {y.isnull().sum()}")
+        print(f"  - The numerical range of the characteristic matrix: {X.describe().loc[['min', 'max']].T}")
+        print(f"  - Target variable range: [{y.min():.2f}, {y.max():.2f}]")
 
         return X, y
 
     def get_model_hyperparameter_grids(self) -> dict:
-        """
-        获取所有模型的超参数搜索空间。
 
-        Returns:
-            包含所有模型超参数网格的字典
-        """
         param_grids = {
             'XGBoost': {
                 'model': xgb.XGBRegressor(
@@ -217,12 +211,12 @@ class ProxyModelTrainer:
                     reg_lambda=1.0
                 ),
                 'params': {
-                    'n_estimators': [50, 100, 200, 300],  # 减少范围，适合小数据集
-                    'max_depth': [3, 4, 5, 6],  # 降低最大深度防止过拟合
-                    'learning_rate': [0.05, 0.1, 0.15, 0.2],  # 更保守的学习率
-                    'subsample': [0.8, 0.9, 1.0],  # 减少选项
+                    'n_estimators': [50, 100, 200, 300], 
+                    'max_depth': [3, 4, 5, 6], 
+                    'learning_rate': [0.05, 0.1, 0.15, 0.2], 
+                    'subsample': [0.8, 0.9, 1.0], 
                     'colsample_bytree': [0.8, 0.9, 1.0],
-                    'reg_alpha': [0.0, 0.1, 0.2],  # 简化正则化参数
+                    'reg_alpha': [0.0, 0.1, 0.2], 
                     'reg_lambda': [0.5, 1.0, 1.5]
                 }
             },
@@ -240,15 +234,15 @@ class ProxyModelTrainer:
                     reg_lambda=1.0
                 ),
                 'params': {
-                    'n_estimators': [50, 100, 200, 300],  # 减少范围
-                    'max_depth': [3, 4, 5, 6],  # 保守的深度设置
+                    'n_estimators': [50, 100, 200, 300], 
+                    'max_depth': [3, 4, 5, 6], 
                     'learning_rate': [0.05, 0.1, 0.15, 0.2],
-                    'num_leaves': [15, 31, 50],  # 减少叶子节点数
+                    'num_leaves': [15, 31, 50], 
                     'subsample': [0.8, 0.9, 1.0],
                     'colsample_bytree': [0.8, 0.9, 1.0],
                     'reg_alpha': [0.0, 0.1, 0.2],
                     'reg_lambda': [0.5, 1.0, 1.5],
-                    'min_child_samples': [1, 5, 10]  # 添加小数据集保护
+                    'min_child_samples': [1, 5, 10] 
                 }
             },
             'RandomForest': {
@@ -279,7 +273,7 @@ class ProxyModelTrainer:
                     epsilon=0.1,
                     gamma='scale'
                 ),
-                'params': {}  # 不进行参数搜索，使用优化后的默认参数
+                'params': {} 
             },
             'Ridge': {
                 'model': Ridge(random_state=42),
@@ -299,15 +293,7 @@ class ProxyModelTrainer:
         return param_grids
 
     def _count_grid_combinations(self, param_dist: dict) -> int:
-        """
-        计算网格搜索的参数组合数量。
 
-        Args:
-            param_dist: 参数网格字典
-
-        Returns:
-            参数组合总数
-        """
         if not param_dist:
             return 0
 
@@ -322,30 +308,16 @@ class ProxyModelTrainer:
                                                       search_method: str = 'randomized',
                                                       n_iter: int = 50,
                                                       cv_folds: int = 5) -> dict:
-        """
-        训练多个模型并进行超参数搜索优化。
 
-        Args:
-            X: 特征矩阵
-            y: 目标变量
-            test_size: 测试集比例
-            random_state: 随机种子
-            search_method: 搜索方法 ('grid' 或 'randomized')
-            n_iter: 随机搜索迭代次数
-            cv_folds: 交叉验证折数
-
-        Returns:
-            包含所有模型结果的字典
-        """
-        # 分割数据
+    
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
             X, y, test_size=test_size, random_state=random_state
         )
 
-        print(f"训练集大小: {len(self.X_train)}")
-        print(f"测试集大小: {len(self.X_test)}")
+        print(f"Training set size: {len(self.X_train)}")
+        print(f"test set size: {len(self.X_test)}")
 
-        # 获取模型参数网格
+   
         param_grids = self.get_model_hyperparameter_grids()
 
         all_results = {}
@@ -353,31 +325,28 @@ class ProxyModelTrainer:
         best_score = -np.inf
         best_model_name = ""
 
-        print("\n开始多模型训练和超参数优化...")
+        print("\nBegin multi-model training and hyperparameter optimization...")
         print("=" * 60)
 
         for model_name, model_config in param_grids.items():
-            print(f"\n正在训练和优化 {model_name}...")
+            print(f"\nTraining and optimization in progress {model_name}...")
 
             model = model_config['model']
             param_dist = model_config['params']
 
-            # 选择搜索方法并训练模型
+            
             try:
-                # 检查模型兼容性
                 if hasattr(model, 'fit'):
-                    # 如果参数空间为空，直接使用预配置的模型
-                    if not param_dist:  # 对于SVR等已优化的模型
-                        print(f"  INFO: 使用预配置的最佳参数训练 {model_name}...")
+                    if not param_dist:
+                        print(f"  INFO: Training with pre-configured optimal parameters{model_name}...")
                         model.fit(self.X_train, self.y_train)
                         y_train_pred = model.predict(self.X_train)
                         y_test_pred = model.predict(self.X_test)
 
-                        # 计算指标
                         results = {
                             'model': model,
                             'best_params': 'optimized_default_parameters',
-                            'best_cv_score': 0.0,  # 未进行交叉验证
+                            'best_cv_score': 0.0, 
                             'train_r2': r2_score(self.y_train, y_train_pred),
                             'test_r2': r2_score(self.y_test, y_test_pred),
                             'train_rmse': np.sqrt(mean_squared_error(self.y_train, y_train_pred)),
@@ -389,26 +358,26 @@ class ProxyModelTrainer:
 
                         all_results[model_name] = results
 
-                        print(f"  METRICS: 测试集R2: {results['test_r2']:.4f}")
-                        print(f"  METRICS: 测试集RMSE: {results['test_rmse']:.4f}")
+                        print(f"  METRICS: Test set R2: {results['test_r2']:.4f}")
+                        print(f"  METRICS: Test set RMSE: {results['test_rmse']:.4f}")
 
-                        # 更新最佳模型
+                       # Update the best model
                         if results['test_r2'] > best_score:
                             best_score = results['test_r2']
                             best_model = model
                             best_model_name = model_name
                             self.model = model
 
-                        continue  # 跳过后续处理，继续下一个模型
+                        continue  
 
 
-                    # 动态调整交叉验证折数以适应小数据集
+                  # Dynamically adjust the number of cross-validation folds to fit small datasets
                     adjusted_cv_folds = cv_folds
                     if len(self.X_train) < cv_folds * 2:
                         adjusted_cv_folds = max(2, len(self.X_train) // 2)
-                        print(f"  WARNING: 数据量过小，自动调整CV折数从 {cv_folds} 到 {adjusted_cv_folds}")
+                        print(f"  WARNING: If the data volume is too small, automatically adjust the number of CV folds from {cv_folds} to {adjusted_cv_folds}.")
 
-                    if search_method == 'grid' and len(param_dist) <= 50:  # 限制网格搜索的参数空间
+                    if search_method == 'grid' and len(param_dist) <= 50: 
                         search = GridSearchCV(
                             model, param_dist, cv=adjusted_cv_folds,
                             scoring='r2', n_jobs=-1, verbose=1
@@ -426,15 +395,13 @@ class ProxyModelTrainer:
                         raise search_e
 
                 else:
-                    raise ValueError(f"模型 {model_name} 不支持 fit 方法")
+                    raise ValueError(f"The model {model_name} does not support the fit method.")
 
             except Exception as e:
 
-                # 记录详细的错误信息
                 import traceback
                 print(f"  DETAILED ERROR: {traceback.format_exc()}")
 
-                # 检查常见问题
                 error_str = str(e).lower()
 
                 try:
@@ -443,11 +410,11 @@ class ProxyModelTrainer:
                     y_train_pred = model.predict(self.X_train)
                     y_test_pred = model.predict(self.X_test)
 
-                    # 计算指标
+                 
                     results = {
                         'model': model,
                         'best_params': 'default_parameters',
-                        'best_cv_score': 0.0,  # 交叉验证失败，使用默认值
+                        'best_cv_score': 0.0,  
                         'train_r2': r2_score(self.y_train, y_train_pred),
                         'test_r2': r2_score(self.y_test, y_test_pred),
                         'train_rmse': np.sqrt(mean_squared_error(self.y_train, y_train_pred)),
@@ -464,29 +431,29 @@ class ProxyModelTrainer:
 
                     all_results[model_name] = results
 
-                    print(f"  METRICS: 测试集R2: {results['test_r2']:.4f}")
-                    print(f"  METRICS: 测试集RMSE: {results['test_rmse']:.4f}")
+                    print(f"  METRICS: Test set R2: {results['test_r2']:.4f}")
+                    print(f"  METRICS: Test set RMSE: {results['test_rmse']:.4f}")
 
-                    # 更新最佳模型
+                    # Update the best model
                     if results['test_r2'] > best_score:
                         best_score = results['test_r2']
                         best_model = model
                         best_model_name = model_name
                         self.model = model
 
-                    continue  # 跳过后续处理，继续下一个模型
+                    continue 
 
                 except Exception as fallback_e:
-                    continue  # 跳过这个模型，继续下一个
+                    continue 
 
-            # 获取最佳模型
+            # Obtain the best model
             best_model_for_type = search.best_estimator_
 
-            # 预测和评估
+           
             y_train_pred = best_model_for_type.predict(self.X_train)
             y_test_pred = best_model_for_type.predict(self.X_test)
 
-            # 计算指标
+         
             results = {
                 'model': best_model_for_type,
                 'best_params': search.best_params_,
@@ -502,20 +469,19 @@ class ProxyModelTrainer:
 
             all_results[model_name] = results
 
-            print(f"  最佳CV R2: {search.best_score_:.4f}")
-            print(f"  测试集R2: {results['test_r2']:.4f}")
-            print(f"  测试集RMSE: {results['test_rmse']:.4f}")
+            print(f"  Best CV R2: {search.best_score_:.4f}")
+            print(f"  Test set R2: {results['test_r2']:.4f}")
+            print(f"  Test set RMSE: {results['test_rmse']:.4f}")
 
-            # 更新最佳模型
+            # Update the best model
             if results['test_r2'] > best_score:
                 best_score = results['test_r2']
                 best_model = best_model_for_type
                 best_model_name = model_name
                 self.model = best_model
 
-        print(f"\n最佳模型: {best_model_name} (测试集R2: {best_score:.4f})")
+        print(f"\nbest_model: {best_model_name} (Test set R2: {best_score:.4f})")
 
-        # 添加模型对比信息
         all_results['best_model_name'] = best_model_name
         all_results['best_model'] = best_model
         all_results['model_comparison'] = self.create_model_comparison_table(all_results)
@@ -523,15 +489,7 @@ class ProxyModelTrainer:
         return all_results
 
     def create_model_comparison_table(self, results: dict) -> pd.DataFrame:
-        """
-        创建模型对比表格。
-
-        Args:
-            results: 包含所有模型结果的字典
-
-        Returns:
-            模型对比DataFrame
-        """
+      
         comparison_data = []
 
         for model_name, model_results in results.items():
@@ -653,7 +611,6 @@ class ProxyModelTrainer:
             self.calculate_shap_values()
 
         plt.figure(figsize=(12, 8))
-        # 使用原始特征名进行SHAP可视化
         shap.summary_plot(
             self.shap_values,
             self.X_test,
@@ -1188,22 +1145,16 @@ class ProxyModelTrainer:
 
         if save_dir:
             plt.savefig(f"{save_dir}/model_ranking_table.png", dpi=300, bbox_inches='tight')
-            print(f"模型排名表保存至: {save_dir}/model_ranking_table.png")
+            print(f"Save the model ranking table to: {save_dir}/model_ranking_table.png")
 
-        # plt.show()  # 注释掉以避免显示图表
+        # plt.show()  
 
     def create_best_model_detailed_analysis(self, all_results: dict, save_dir: str = None) -> None:
-        """
-        为最佳模型创建详细的分析图表。
 
-        Args:
-            all_results: 包含所有模型结果的字典
-            save_dir: 保存图表的目录
-        """
         best_model_name = all_results['best_model_name']
         best_model_results = all_results[best_model_name]
 
-        # 重新训练最佳模型以获取SHAP值
+    
         y_test_pred = self.model.predict(self.X_test)
 
         # 1. Prediction vs Actual scatter plot
@@ -1264,13 +1215,12 @@ class ProxyModelTrainer:
 
         if save_dir:
             plt.savefig(f"{save_dir}/best_model_detailed_analysis.png", dpi=300, bbox_inches='tight')
-            print(f"最佳模型详细分析保存至: {save_dir}/best_model_detailed_analysis.png")
+            print(f"Detailed analysis of the best model saved to: {save_dir}/best_model_detailed_analysis.png")
 
-        # 2. 特征重要性图（如果模型支持）
+        # 2. Feature importance graph (if the model supports it)
         if hasattr(self.model, 'feature_importances_'):
             plt.figure(figsize=(12, 8))
 
-            # 使用原始特征名进行显示
             feature_importance = {}
             for i, importance in enumerate(self.model.feature_importances_):
                 clean_name = self.feature_names[i]
@@ -1295,16 +1245,16 @@ class ProxyModelTrainer:
                 plt.savefig(f"{save_dir}/best_model_feature_importance.png", dpi=300, bbox_inches='tight')
                 print(f"Best model feature importance saved to: {save_dir}/best_model_feature_importance.png")
 
-        # 3. 计算SHAP值（如果支持）
+    
         try:
-            if hasattr(self.model, 'predict') and len(self.X_test) <= 1000:  # 限制SHAP计算的数据量
-                print("计算最佳模型的SHAP值...")
+            if hasattr(self.model, 'predict') and len(self.X_test) <= 1000: 
+                print("Calculate the SHAP value of the optimal model...")
                 self.calculate_shap_values()
                 self.create_shap_summary_plot(f"{save_dir}/best_model_shap_summary.png")
 
-                # 创建SHAP特征重要性条形图
+                # Create a SHAP feature importance bar chart
                 plt.figure(figsize=(12, 8))
-                # 使用原始特征名进行SHAP可视化
+                # Visualize SHAP using the original feature names
                 shap.summary_plot(self.shap_values, self.X_test,
                                 feature_names=self.original_feature_names,
                                 plot_type="bar", show=False)
@@ -1316,10 +1266,9 @@ class ProxyModelTrainer:
                     print(f"Best model SHAP importance saved to: {save_dir}/best_model_shap_importance.png")
 
         except Exception as e:
-            print(f"SHAP计算失败: {e}")
+            print(f"SHAP calculation failed: {e}")
 
-        # plt.show()  # 注释掉以避免显示图表
-
+        # plt.show() 
     def create_model_performance_plots(self, results: dict, save_dir: str = None) -> None:
         """
         Create comprehensive model performance plots.
@@ -1518,7 +1467,7 @@ Examples:
 
     # Initialize paths
     base_path = Path(__file__).parent.parent
-    nutritional_data_path = base_path / 'data' / 'FNDDS_2017_2018_nutrients_人工nova分类.csv'
+    nutritional_data_path = base_path / 'data' / 'FNDDS_2017_2018_nutrients_nova.csv'
     assessment_data_path = base_path / 'results' / 'nutritional_assessments.json'
     output_dir = base_path / 'results' / 'proxy_model_results'
 
@@ -1528,17 +1477,17 @@ Examples:
     # Check if CSV data exists (preferred for training)
     csv_path = assessment_data_path.with_suffix('.csv')
     if not csv_path.exists():
-        print(f"错误：找不到CSV训练数据文件 {csv_path}")
-        print("请先运行 'python main.py generate' 来生成训练数据")
+        print(f"Error: CSV training data file not found. {csv_path}")
+        print("Please run 'python main.py generate' first to generate the training data.")
         return
 
-    print(f"使用现有CSV训练数据: {csv_path}")
+    print(f"Using existing CSV training data: {csv_path}")
     if args.sample_size:
-        print(f"使用样本数量: {args.sample_size}")
+        print(f"Use sample size: {args.sample_size}")
 
     # Step 2: Train multiple models and generate visualizations
     print("\n" + "=" * 60)
-    print("STEP 2: 多模型训练和超参数优化")
+    print("STEP 2: Multi-model training and hyperparameter optimization")
     print("=" * 60)
 
     # Initialize trainer
@@ -1546,7 +1495,7 @@ Examples:
 
     # Load and prepare data
     print("=" * 60)
-    print("加载和准备数据")
+    print("Loading and preparing data")
     print("=" * 60)
 
     merged_df = trainer.load_and_merge_data()
@@ -1555,19 +1504,19 @@ Examples:
     # Apply sample size if specified
     if args.sample_size and args.sample_size < total_samples:
         merged_df = merged_df.sample(n=args.sample_size, random_state=42)
-        print(f"从{total_samples}个样本中采样了{args.sample_size}个样本")
+        print(f"{args.sample_size} samples were sampled from {total_samples} samples.")
     else:
-        print(f"使用全部{total_samples}个样本进行训练")
+        print(f"Training is performed using all {total_samples} samples.")
 
     X, y = trainer.prepare_features(merged_df)
 
     # Train multiple models with hyperparameter search
     print("\n" + "=" * 60)
-    print("多模型训练和超参数优化")
+    print("Multi-model training and hyperparameter optimization")
     print("=" * 60)
-    print(f"搜索方法: {args.search_method}")
-    print(f"随机搜索迭代次数: {args.n_iter}")
-    print(f"交叉验证折数: {args.cv_folds}")
+    print(f"Search method: {args.search_method}")
+    print(f"Random search iteration count: {args.n_iter}")
+    print(f"Cross-validation folds: {args.cv_folds}")
 
     all_results = trainer.train_multiple_models_with_hyperparameter_search(
         X, y,
@@ -1578,29 +1527,29 @@ Examples:
 
     # Display model comparison
     print("\n" + "=" * 60)
-    print("模型性能排名")
+    print("Model performance ranking")
     print("=" * 60)
     print(all_results['model_comparison'].to_string(index=False))
 
     best_model_name = all_results['best_model_name']
     best_results = all_results[best_model_name]
 
-    print(f"\n最佳模型: {best_model_name}")
-    print(f"最佳参数: {best_results['best_params']}")
-    print(f"测试集R2: {best_results['test_r2']:.4f}")
-    print(f"测试集RMSE: {best_results['test_rmse']:.4f}")
-    print(f"测试集MAE: {best_results['test_mae']:.4f}")
+    print(f"\nOptimal Model: {best_model_name}")
+    print(f"Optimal parameters: {best_results['best_params']}")
+    print(f"Test set R2: {best_results['test_r2']:.4f}")
+    print(f"Test set RMSE: {best_results['test_rmse']:.4f}")
+    print(f"Test set MAE: {best_results['test_mae']:.4f}")
 
     # Create model comparison visualizations
     print("\n" + "=" * 60)
-    print("创建模型对比可视化")
+    print("Create model comparison visualization")
     print("=" * 60)
 
     trainer.create_model_comparison_plots(all_results, output_dir)
 
     # Create best model detailed analysis
     print("\n" + "=" * 60)
-    print("最佳模型详细分析")
+    print("Detailed analysis of the best model")
     print("=" * 60)
 
     trainer.create_best_model_detailed_analysis(all_results, output_dir)
@@ -1608,7 +1557,7 @@ Examples:
     if not args.models_only:
         # SHAP analysis for best model
         print("\n" + "=" * 60)
-        print("最佳模型SHAP分析")
+        print("Optimal Model SHAP Analysis")
         print("=" * 60)
 
         try:
@@ -1616,25 +1565,25 @@ Examples:
             trainer.create_shap_dependence_plots(output_dir)
             trainer.create_shap_interaction_matrix(output_dir)
         except Exception as e:
-            print(f"SHAP分析失败: {e}")
+            print(f"SHAP analysis failed: {e}")
 
         # Resolution analysis
         print("\n" + "=" * 60)
-        print("分辨率分析")
+        print("Resolution Analysis")
         print("=" * 60)
 
         trainer.analyze_resolution_by_nova_group(merged_df, f"{output_dir}/nova_4_resolution.png")
 
         # Interaction effects
         print("\n" + "=" * 60)
-        print("交互效应分析")
+        print("Interaction effect analysis")
         print("=" * 60)
 
         interaction_results = trainer.analyze_interaction_effects(merged_df, output_dir)
 
         # Generate comprehensive report
         print("\n" + "=" * 60)
-        print("生成综合报告")
+        print("Generate a comprehensive report")
         print("=" * 60)
 
         # Convert results to format compatible with existing report generation
@@ -1656,10 +1605,10 @@ Examples:
             results_for_report, interaction_results, f"{output_dir}/validation_report.json"
         )
 
-        print("\n验证总结:")
-        print(f"  R2 分数: {report['model_validation']['r2_score']:.4f}")
-        print(f"  解释: {report['model_validation']['interpretation']}")
-        print(f"  结论: {report['validation_conclusion']}")
+        print("\nVerification Summary:")
+        print(f"  R2 score: {report['model_validation']['r2_score']:.4f}")
+        print(f"  explain: {report['model_validation']['interpretation']}")
+        print(f"  in conclusion: {report['validation_conclusion']}")
 
     # Save model comparison results
     comparison_results = {
@@ -1682,24 +1631,24 @@ Examples:
     with open(f"{output_dir}/model_comparison_results.json", 'w', encoding='utf-8') as f:
         json.dump(comparison_results, f, indent=2, ensure_ascii=False, default=str)
 
-    print(f"\n所有结果保存至: {output_dir}/")
-    print("分析完成！")
-    print(f"\n[SUCCESS] 生成的文件:")
-    print(f"  [PLOT] model_comparison.png: 模型性能对比图表")
-    print(f"  [TABLE] model_ranking_table.png: 模型排名表")
-    print(f"  [PLOT] best_model_detailed_analysis.png: 最佳模型详细分析")
-    print(f"  [PLOT] best_model_feature_importance.png: 最佳模型特征重要性")
-    print(f"  [PLOT] best_model_shap_summary.png: SHAP特征影响分析")
-    print(f"  [PLOT] best_model_shap_importance.png: SHAP重要性排名")
-    print(f"  [PLOT] shap_interaction_matrix.png: SHAP交互值矩阵热力图")
-    print(f"  [DATA] shap_interaction_matrix.csv: SHAP交互值矩阵数据")
-    print(f"  [PLOTS] shap_dependence_*.png: 所有特征的SHAP依赖图 ({len(trainer.original_feature_names)}个文件)")
-    print(f"  [PLOT] nova_4_resolution.png: NOVA第4组分辨率分析")
-    print(f"  [PLOT] interaction_protein_processing.png: 蛋白质-加工交互效应")
-    print(f"  [DATA] model_comparison_results.json: 模型对比结果数据")
+    print(f"\nAll results are saved to: {output_dir}/")
+    print("Analysis complete!")
+    print(f"\n[SUCCESS] The generated file:")
+    print(f"  [PLOT] model_comparison.png: Model performance comparison chart")
+    print(f"  [TABLE] model_ranking_table.png: Model ranking table")
+    print(f"  [PLOT] best_model_detailed_analysis.png: Detailed analysis of the best model")
+    print(f"  [PLOT] best_model_feature_importance.png: Optimal Model Feature Importance")
+    print(f"  [PLOT] best_model_shap_summary.png: SHAP Feature Impact Analysis")
+    print(f"  [PLOT] best_model_shap_importance.png: SHAP Importance Ranking")
+    print(f"  [PLOT] shap_interaction_matrix.png: SHAP Interaction Value Matrix Heatmap")
+    print(f"  [DATA] shap_interaction_matrix.csv: SHAP Interaction Value Matrix Data")
+    print(f"  [PLOTS] shap_dependence_*.png: SHAP dependency graph of all features ({len(trainer.original_feature_names)} files)")
+    print(f"  [PLOT] nova_4_resolution.png: NOVA Group 4 Resolution Analysis")
+    print(f"  [PLOT] interaction_protein_processing.png: Protein-processing interaction")
+    print(f"  [DATA] model_comparison_results.json: Model comparison results data")
     if not args.models_only:
-        print(f"  [REPORT] validation_report.json: 综合验证报告")
-    print(f"\n[COMPLETE] 训练完成！所有模型已训练，参数搜索已完成，可视化图表已生成！")
+        print(f"  [REPORT] validation_report.json: Comprehensive validation report")
+    print(f"\n[COMPLETE] Training complete! All models have been trained, parameter search is complete, and visualizations have been generated!")
 
 
 if __name__ == "__main__":
