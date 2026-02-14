@@ -2,7 +2,7 @@
 
 Code for the paper:
 
-**Beyond the binary classification paradigms: Large language models assisted Nutritional Integrity Index reveal hidden heterogeneity in ultra-processed food health impacts**
+**Nutritional integrity, rather than processing per se, predicts metabolic health across ultra-processed foods**
 
 This repository contains the code to (i) generate an LLM-derived **Nutritional Integrity Index (NII)** from nutrient profiles and (ii) train an ML **proxy model** that predicts NII from nutrients, enabling large-scale scoring and mechanistic interpretability (e.g., SHAP).
 
