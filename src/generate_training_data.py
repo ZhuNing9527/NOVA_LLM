@@ -16,21 +16,15 @@ from datetime import datetime
 import os
 
 class PathManager:
-    """管理项目文件夹结构和路径"""
+    
 
     def __init__(self, base_path: str = None):
-        """
-        初始化路径管理器
-
-        Args:
-            base_path: 项目根路径，默认为当前工作目录
-        """
         if base_path is None:
             base_path = os.getcwd()
 
         self.base_path = Path(base_path)
 
-        # 定义文件夹结构
+   
         self.folders = {
             'data': self.base_path / 'data',
             'raw_data': self.base_path / 'data',
@@ -41,27 +35,18 @@ class PathManager:
             'src': self.base_path / 'src'
         }
 
-        # 创建所有必要的文件夹
+  
         self._create_folders()
 
     def _create_folders(self):
-        """创建所有必要的文件夹"""
+
         for folder_name, folder_path in self.folders.items():
             folder_path.mkdir(parents=True, exist_ok=True)
 
     def get_path(self, folder_name: str, filename: str = None) -> Path:
-        """
-        获取指定文件夹的路径
 
-        Args:
-            folder_name: 文件夹名称 ('data', 'images', 'logs', 'processed_data')
-            filename: 文件名（可选）
-
-        Returns:
-            完整路径
-        """
         if folder_name not in self.folders:
-            raise ValueError(f"未知的文件夹名称: {folder_name}")
+            raise ValueError(f"tmp: {folder_name}")
 
         path = self.folders[folder_name]
         if filename:
@@ -69,7 +54,7 @@ class PathManager:
 
         return path
 
-# 初始化路径管理器
+
 path_manager = PathManager()
 
 # Configure logging
@@ -446,7 +431,6 @@ IMPORTANT:
 
                 # Save batch results
                 if processed_count % batch_size == 0:
-                    # 从完整路径中提取文件名
                     output_filename = Path(output_path).name
                     self._save_intermediate_results(all_assessments, failed_items, output_filename, processed_count)
 
@@ -477,7 +461,6 @@ IMPORTANT:
                                    output_filename: str,
                                    processed_count: int) -> None:
         """Save intermediate results to prevent data loss."""
-        # 生成中间结果文件名
         intermediate_filename = output_filename.replace('.json', f'_intermediate_{processed_count}.json')
         intermediate_path = path_manager.get_path('processed_data', intermediate_filename)
 
@@ -491,7 +474,7 @@ IMPORTANT:
         with open(intermediate_path, 'w', encoding='utf-8') as f:
             json.dump(results, f, indent=2, ensure_ascii=False)
 
-        logger.info(f"已保存中间结果: {intermediate_path}")
+        logger.info(f"result: {intermediate_path}")
 
     def _save_final_results(self, assessments: List[Dict],
                            failed_items: List[Dict],
@@ -516,7 +499,7 @@ IMPORTANT:
         with open(final_path, 'w', encoding='utf-8') as f:
             json.dump(results, f, indent=2, ensure_ascii=False)
 
-        logger.info(f"已保存最终结果: {final_path}")
+        logger.info(f"final_result: {final_path}")
 
     def save_validation_results(self, validation_stats: Dict, output_filename: str) -> None:
         """Save validation results."""
@@ -526,7 +509,7 @@ IMPORTANT:
         with open(validation_path, 'w', encoding='utf-8') as f:
             json.dump(validation_stats, f, indent=2, ensure_ascii=False)
 
-        logger.info(f"已保存验证结果: {validation_path}")
+        logger.info(f"validation: {validation_path}")
 
     def validate_assessments(self, assessments: List[Dict]) -> Dict:
         """
