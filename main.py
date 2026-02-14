@@ -3,30 +3,28 @@ import sys
 import os
 from pathlib import Path
 
-# 添加src目录到Python路径
 sys.path.insert(0, str(Path(__file__).parent / 'src'))
 
 def print_usage():
-    """打印使用说明"""
+   "Print Instructions"
     print("""
-NOVA LLM 营养评估项目
-
-使用方法:
+NOVA LLM Nutrition Assessment Program
+How to use:
   python main.py <command>
 
-可用命令:
-  generate    - 生成训练数据 (营养评估)
-  train       - 训练模型并做可视化分析
-  help        - 显示此帮助信息
+Available commands:
+  generate    - Generate training data (nutritional assessment)
+  train       - Train the model and perform visualization analysis.
+  help        - Show this help information
 
 示例:
-  python main.py generate    # 生成营养评估数据
-  python main.py train --sample-size 50    # 训练模型(50个样本，快速测试)
-  python main.py train    # 最佳配置训练：多模型+参数搜索+完整可视化
+  python main.py generate    # Generate nutritional assessment data
+  python main.py train --sample-size 50    # Training the model (50 samples, quick test)
+  python main.py train    # Optimal Configuration Training: Multiple Models + Parameter Search + Complete Visualization
 """)
 
 def main():
-    """主函数"""
+    """Main Function"""
     if len(sys.argv) < 2:
         print_usage()
         return
@@ -44,14 +42,15 @@ def main():
         elif command in ['help', '--help', '-h']:
             print_usage()
         else:
-            print(f"未知命令: {command}")
+            print(f"Unknown command: {command}")
             print_usage()
 
     except ImportError as e:
-        print(f"导入错误: {e}")
-        print("请确保所有依赖模块都存在于src目录中")
+        print(f"Import error: {e}")
+        print("Please ensure that all dependent modules exist in the src directory.")
     except Exception as e:
-        print(f"执行错误: {e}")
+        print(f"Execution error: {e}")
 
 if __name__ == "__main__":
+
     main()
