@@ -39,7 +39,7 @@ def check_files():
 
     required_files = [
         base_path / 'config.py',
-        base_path / 'data' / '副本FNDDS_2017_2018_NOVA_v3_nutrients.csv',
+        base_path / 'data' / 'FNDDS_2017_2018_NOVA_v3_nutrients.csv',
         base_path / 'src' / 'generate_training_data.py',
         base_path / 'src' / 'train_proxy_model.py'
     ]
@@ -70,9 +70,9 @@ def run_data_generation(sample_size=None):
         from config import api_key
         import pandas as pd
 
-        # 构建路径
+       
         base_path = Path(__file__).parent.parent
-        data_path = base_path / 'data' / '副本FNDDS_2017_2018_NOVA_v3_nutrients.csv'
+        data_path = base_path / 'data' / 'FNDDS_2017_2018_NOVA_v3_nutrients.csv'
         output_path = base_path / 'results' / 'nutritional_assessments.json'
 
         # Load data
@@ -122,10 +122,10 @@ def run_model_training():
         sys.path.insert(0, str(Path(__file__).parent))
         from train_proxy_model import ProxyModelTrainer
 
-        # 构建路径
+      
         base_path = Path(__file__).parent.parent
         assessment_data_path = base_path / 'results' / 'nutritional_assessments.json'
-        nutritional_data_path = base_path / 'data' / '副本FNDDS_2017_2018_NOVA_v3_nutrients.csv'
+        nutritional_data_path = base_path / 'data' / 'FNDDS_2017_2018_NOVA_v3_nutrients.csv'
 
         # Check if assessment data exists
         if not Path(assessment_data_path).exists():
